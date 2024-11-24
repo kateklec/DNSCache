@@ -76,8 +76,7 @@ void test_dns_cache_overflow() {
         dnsCache.update(domain, ip);
     }
 
-    // Проверяем, что кэш не переполнился, удалив старые записи
-    assert(dnsCache.resolve("example.com").empty());  // Должно быть пустым, так как запись удалена
+    assert(dnsCache.resolve("example.com").empty());
     assert(dnsCache.resolve("google.com").empty());
     assert(dnsCache.resolve("github.com").empty());
     assert(dnsCache.resolve("openai.com").empty());
@@ -88,7 +87,6 @@ void test_dns_cache_overflow() {
     assert(dnsCache.resolve("reddit.com").empty());
     assert(dnsCache.resolve("stackoverflow.com").empty());
 
-    // Проверяем, что новые записи присутствуют и имеют корректный IP
     assert(dnsCache.resolve("youtube.com") == "192.168.1.11");
     assert(dnsCache.resolve("facebook.com") == "192.168.1.12");
     assert(dnsCache.resolve("twitter.com") == "192.168.1.13");
@@ -97,12 +95,11 @@ void test_dns_cache_overflow() {
 }
 
 void test_singleton() {
-    DNSCache& instance1 = DNSCache::getInstance(3); // Размер устанавливается только при первом вызове
+    DNSCache& instance1 = DNSCache::getInstance(3);
     DNSCache& instance2 = DNSCache::getInstance(4);
     DNSCache& instance3 = DNSCache::getInstance(3);
     DNSCache& instance4 = DNSCache::getInstance(6);
 
-    // Проверка, что экземпляры указывают на один и тот же объект
     assert(&instance1 == &instance2);
     assert(&instance2 == &instance3);
     assert(&instance3 == &instance4);
