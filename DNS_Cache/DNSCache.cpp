@@ -1,5 +1,4 @@
 ﻿#include "DNSCache.h"
-#include <iostream>
 
 DNSCache& DNSCache::getInstance(size_t max_size) {
     static DNSCache instance(max_size);
@@ -20,17 +19,19 @@ void DNSCache::update(const std::string& name, const std::string& ip) {
     }
     else {
         if (dns_map_.size() == max_size_) {
-            const auto& lru_name = domain_list_.front();
-            auto node = dns_map_.extract(lru_name);
-            domain_list_.front() = name;
-            domain_list_.splice(domain_list_.end(), domain_list_, domain_list_.begin());
+            const auto* lru_name = domain_list_.front();
+            auto node = dns_map_.extract(*lru_name);
             node.key() = name;
             node.mapped() = { ip, --domain_list_.end() };
+            domain_list_.front() = &node.key();
+            domain_list_.splice(domain_list_.end(), domain_list_, domain_list_.begin());
             dns_map_.insert(std::move(node));
         }
-        else {
-            domain_list_.push_back(name);
-            dns_map_[name] = { ip, --domain_list_.end() };
+        else {          
+            auto result = dns_map_.emplace(name, CacheData{ip, {}});
+            const auto& key_ref = result.first->first;
+            domain_list_.push_back(&key_ref);
+            result.first->second.pos_in_domain_list_ = std::prev(domain_list_.end());
         }
     }
 }
